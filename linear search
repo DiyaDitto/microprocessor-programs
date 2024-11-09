@@ -1,0 +1,102 @@
+.model small
+.386
+
+.data
+	array dd 30 dup(?)
+	len db ?
+	num dd ?
+	str1 db 0ah,"Enter the number of elements: $"
+	str2 db 0ah,"Enter the array elements: $"
+	str3 db 0ah,"Enter the item to be searched: $"
+	str4 db 0ah,"The item found at position: $"
+	str5 db 0ah,"The item not found: $"
+	
+.code
+	mov ax,@data
+	mov ds,ax
+	
+	lea dx,str1
+	mov ah,09h
+	int 21h
+	
+	mov ah,01h
+	int 21h
+	sub al,30h
+	mov [len],al
+	
+	lea dx,str2
+	mov ah,09h
+	int 21h
+	
+	lea si,array
+	mov cl,[len]
+	read:
+		mov ebx,0000h
+		mov ah,01h
+		int 21h
+		mov bh,al
+		
+		int 21h
+		mov bl,al
+		
+		rol ebx,16; rotate left operation on ebx register, 16 positions
+		
+		int 21h
+		mov bh,al
+		
+		int 21h
+		mov bl,al
+	
+		mov [si],ebx
+		add si,4; incrementing index register by 4 bytes(because each digit take 1 byte)
+		mov ah,02h
+		mov dl," "
+		int 21h
+	loop read
+	
+
+	lea dx,str3
+	mov ah,09h
+	int 21h
+;reading the item to be searched	
+	mov ah,01h
+	int 21h
+	mov bh,al
+	int 21h
+	mov bl,al
+	rol ebx,16
+	int 21h
+	mov bh,al
+	int 21h
+	mov bl,al
+	
+	mov [num],ebx
+	
+	lea si,array
+	mov cl,[len]
+	mov bh,00h
+	search:
+		inc bh
+		mov eax,[si]
+		.if eax == [num]
+			lea dx,str4
+			mov ah,09h
+			int 21h
+			mov ah,02h
+			mov dl,bh
+			add dl,30h
+			int 21h
+			mov ah,4ch
+			int 21h
+		.else
+			add si,4
+		.endif
+	loop search	
+	
+	lea dx,str5
+	mov ah,09h
+	int 21h
+	
+	mov ah,4ch
+	int 21h
+end
